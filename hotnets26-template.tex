@@ -1,24 +1,12 @@
-\documentclass[sigconf, 10pt, anonymous, nonacm]{acmart}
+\documentclass[sigconf, 10pt, nonacm]{acmart}
 \settopmatter{printfolios=true, printccs=false, printacmref=false}
 
 \title{Profiling \& Alleviating Performance Bottlenecks in Zeek}
 
-\author{Jyotsnya Arunkumar}
-\affiliation{%
-  \institution{The University of Texas at Austin}
-  \city{Austin}
-  \country{USA}
-}
+\author{Jyotsna Arunkumar \hspace{1cm} Arnav Batra \hspace{1cm} Matthew Sickler}
 
-\author{Arnav Batra}
-\affiliation{%
-  \institution{The University of Texas at Austin}
-  \city{Austin}
-  \country{USA}
-}
-
-\author{Matthew Sickler}
-\affiliation{%
+\affiliation{
+  \vspace{0.4em}
   \institution{The University of Texas at Austin}
   \city{Austin}
   \country{USA}
@@ -44,12 +32,16 @@ demonstrate correctness and usefulness. The proposal must also explain how the
 
 \maketitle
 
+\section{Related Work}
+
+(include summary of related work and existing gaps in research here)
+
 \section{Problem \& Motivation}
 
 First developed under the name "Bro" in the 1990s, Zeek is an open-source network
  security monitoring platform that passively analyzes real-time network traffic, 
  performing actions including protocol parsing, connection tracking, event generation, 
- scripting, and logging. According to the Zeek Project website, it has over 10,000+ 
+ scripting, and logging. According to the Zeek Project website, it has over 10,000 
  deployments worldwide~\cite{zeek-website}.
 
 However, Zeek's packet-processing cost can vary substantially with traffic rate, 
@@ -57,25 +49,84 @@ packet size, flow churn, protocol mix, enabled analyzers, and scripts. Within a
 single Zeek worker, these costs can create processing bottlenecks, which may lead 
 to incomplete visibility into network traffic as packets are dropped from processing 
 queues. In deployments with multiple workers, which are typically assigned packets via 
-flow hashing, this variable cost can also lead to load imbalances in their workloads.
+flow hashing, this variable cost can also lead to load imbalances across workers.
  As a result, the actual processing capacity of a worker cluster may be lower than
   the theoretical maximum, as seen in metrics including throughput and packet drops.
 
 
 ("identify the intended users and their current workflow, survey existing tools, explain the missing capability"
 
-This sentence shows an example citation~\cite{cerf-kahn-1974}. Each reference
-must list all authors of the cited work.)
 
 \section{Proposed Work}
 
 ("define the proposed interface and implementation")
 
-\section{Evaluation Criteria}
 
-("describe how you will demonstrate correctness and usefulness"
-"explain how the project can be developed and evaluated without specialized hardware or a multi-GPU cluster"
-"75/100/125")
+\section{Evaluation}
+
+We will evaluate the project using controlled workloads that vary four traffic 
+characteristics: packet rate, packet size, flow churn, and protocol mix. Profiling 
+these variables may help explain why some flows are more expensive to process than 
+others.
+
+Our evaluation will focus on whether these workload characteristics contribute 
+to bottlenecks and load imbalances, and how our proposed mitigation improves 
+performance.
+
+Our main metrics will be:
+
+\begin{itemize}
+    \item packet-processing throughput,
+    \item packet-drop rate,
+    \item CPU utilization,
+    \item worker load imbalance,
+    \item memory consumption
+    \item any overhead introduced by the proposed mitigation
+\end{itemize}
+
+\subsection{75\% Goal}
+
+We will first characterize how Zeek performance and worker imbalance change 
+across workloads with different packet rates, packet sizes, flow churn, and 
+protocol mixes. Using these experiments, we expect to narrow down to one 
+reproducible performance bottleneck.
+
+We will then implement a simple mitigation that addresses the identified 
+bottleneck. For example, if worker imbalance is the targeted issue, we will implement 
+cost-aware flow-assignment to send new flows to a less-loaded Zeek worker.
+
+We will compare the proposed mitigation against Zeek's existing behavior under 
+the same workload. The 75\% goal will be considered successful if the mitigation 
+demonstrates a measurable performance improvement, such as reduced worker imbalance, 
+fewer packet drops, lower CPU utilization, or higher throughput.
+
+\subsection{100\% Goal}
+
+We will design and implement an improved mitigation based on the bottleneck 
+identified during profiling and on the results of the 75\% implementation. For worker
+imbalance, we will iterate on our cost-aware flow-assignment strategy
+to consider the estimated processing cost of a new flow and the current 
+load of each Zeek worker while preserving flow affinity. For other bottlenecks, 
+we will design an improved mitigation.
+
+We will evaluate the improved mitigation across multiple traffic rates and different 
+types of network traffic, comparing it against Zeek's existing performance. We will 
+measure relevant metrics such as throughput, packet drops, CPU utilization, worker-load 
+imbalance, memory consumption, and overhead. Using these metrics, we will characterize 
+the observed benefits and possible limitations of the mitigation.
+
+\subsection{125\% Goal}
+
+We will extend the 100\% solution with a more dynamic implementation that responds 
+to changes in workload behavior. One possible extension is to predict a new flow's 
+processing cost using information from its first few packets (e.g. packet 
+size, header metadata, transport protocol). 
+We will evaluate whether this prediction improves worker assignment compared with 
+the 100\% solution.
+
+For other bottlenecks, the 125\% goal will extend the existing mitigation, 
+possibly by identifying unusually expensive flows or dynamically adding/removing 
+workers.
 
 \section{Required Resources}
 
