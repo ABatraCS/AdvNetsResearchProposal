@@ -86,8 +86,8 @@ Our main metrics will be:
 
 \subsection{75\% Goal}
 
-We will first characterize how Zeek performance and worker imbalance change 
-across workloads with different packet rates, packet sizes, flow churn, and 
+We will characterize how Zeek performance and worker imbalance change 
+by running workloads with different packet rates, packet sizes, flow churn, and 
 protocol mixes. Using these experiments, we expect to narrow down to one 
 reproducible performance bottleneck.
 
@@ -96,8 +96,8 @@ bottleneck. For example, if worker imbalance is the targeted issue, we will impl
 cost-aware flow-assignment to send new flows to a less-loaded Zeek worker.
 
 We will compare the proposed mitigation against Zeek's existing behavior under 
-the same workload. The 75\% goal will be considered successful if the mitigation 
-demonstrates a measurable performance improvement, such as reduced worker imbalance, 
+the same workload. We will consider this goal successful if the mitigation 
+demonstrates a measurable performance improvement, like reduced worker imbalance, 
 fewer packet drops, lower CPU utilization, or higher throughput.
 
 \subsection{100\% Goal}
@@ -109,9 +109,9 @@ to consider the estimated processing cost of a new flow and the current
 load of each Zeek worker while preserving flow affinity. For other bottlenecks, 
 we will design an improved mitigation.
 
-We will evaluate the improved mitigation across multiple traffic rates and different 
+We will evaluate the improved mitigation across different 
 types of network traffic, comparing it against Zeek's existing performance. We will 
-measure relevant metrics such as throughput, packet drops, CPU utilization, worker-load 
+measure metrics such as throughput, packet drops, CPU utilization, worker-load 
 imbalance, memory consumption, and overhead. Using these metrics, we will characterize 
 the observed benefits and possible limitations of the mitigation.
 
