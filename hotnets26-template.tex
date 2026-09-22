@@ -130,7 +130,21 @@ workers.
 
 \section{Required Resources}
 
-(Replace this text with the body of your paper.)
+The proposed work does not require specialized hardware or a multi-GPU cluster. 
+
+Our main resources will include:
+
+\begin{itemize}
+    \item \textbf{CloudLab} for compute resources
+    \item \textbf{tcpreplay} for existing packet captures
+    \item \textbf{iperf3} for generating traffic with variable packet sizes and 
+    flow patterns
+    \item \textbf{Linux \texttt{perf}} for profiling CPU usage
+    \item \textbf{\texttt{zeekctl top}} for measuring per-worker CPU and memory 
+    utilization
+    \item\textbf{Zeek's Prometheus tool} for logging per-worker CPU metrics during 
+    automated experiments
+\end{itemize}
 
 \section{Team Member Responsibilities}
 
