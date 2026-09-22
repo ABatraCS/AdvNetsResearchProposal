@@ -1,2 +1,4 @@
 /generated/*
 !/generated/*.pdf
+hotnets26-template*
+!hotnets26-template.tex
