@@ -46,6 +46,22 @@ demonstrate correctness and usefulness. The proposal must also explain how the
 
 \section{Problem \& Motivation}
 
+First developed under the name "Bro" in the 1990s, Zeek is an open-source network
+ security monitoring platform that passively analyzes real-time network traffic, 
+ performing actions including protocol parsing, connection tracking, event generation, 
+ scripting, and logging. According to the Zeek Project website, it has over 10,000+ 
+ deployments worldwide~\cite{zeek-website}.
+
+However, Zeek's packet-processing cost can vary substantially with traffic rate, 
+packet size, flow churn, protocol mix, enabled analyzers, and scripts. Within a 
+single Zeek worker, these costs can create processing bottlenecks, which may lead 
+to incomplete visibility into network traffic as packets are dropped from processing 
+queues. In deployments with multiple workers, which are typically assigned packets via 
+flow hashing, this variable cost can also lead to load imbalances in their workloads.
+ As a result, the actual processing capacity of a worker cluster may be lower than
+  the theoretical maximum, as seen in metrics including throughput and packet drops.
+
+
 ("identify the intended users and their current workflow, survey existing tools, explain the missing capability"
 
 This sentence shows an example citation~\cite{cerf-kahn-1974}. Each reference
@@ -58,7 +74,8 @@ must list all authors of the cited work.)
 \section{Evaluation Criteria}
 
 ("describe how you will demonstrate correctness and usefulness"
-"explain how the project can be developed and evaluated without specialized hardware or a multi-GPU cluster")
+"explain how the project can be developed and evaluated without specialized hardware or a multi-GPU cluster"
+"75/100/125")
 
 \section{Required Resources}
 
