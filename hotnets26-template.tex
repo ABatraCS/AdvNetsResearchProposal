@@ -13,28 +13,25 @@
 }
 
 \begin{abstract}
-(The two-page proposal should describe the problem, \textbf{its relationship to the 
-course}, the proposed work, the responsibilities of each team member, the 
-resources required, and how the outcome will be evaluated. Your proposal should 
-convince us that the project is relevant, technically meaningful, feasible 
-within one semester, and supported by a concrete evaluation plan.
+We present a proposal for identifying and alleviating bottlenecks in Zeek,
+a network security monitoring system. Prior work has shown that CPU and memory
+consumption for Zeek, previously called Bro, is subject to the characteristics
+of the network traffic~\cite{dreger08}. For example, Campbell and Lee
+address bottlenecks created by large flows specifically by building a shunting
+policy to limit packet processing once certain conditions are 
+met, reducing the load on Bro workers~\cite{campbell2012}. 
 
-Engineering-track proposals should identify the intended users and their 
-current workflow, survey existing tools, explain the missing capability, 
-define the proposed interface and implementation, and describe how you will 
-demonstrate correctness and usefulness. The proposal must also explain how the
- project can be developed and evaluated without specialized hardware or a 
- multi-GPU cluster.)
+We outline a proposal for designing a reproducible profiling framework and using the 
+resulting data to investigate strategies for mitigating bottlenecks. In this project, 
+we will profile Zeek by testing different types of network traffic. Across these 
+experiments, we will measure various performance metrics to identify a bottleneck. 
+We will then design and evaluate a solution in its ability to improve performance. 
 
 \end{abstract}
 
 \begin{document}
 
 \maketitle
-
-\section{Related Work}
-
-(include summary of related work and existing gaps in research here)
 
 \section{Problem \& Motivation}
 
@@ -66,7 +63,7 @@ To begin, we will evaluate Zeek using controlled, reproducible workloads that
 vary four traffic characteristics: packet rate, packet size, flow churn, and 
 protocol mix. Our assessment will focus on whether these workload
  characteristics contribute to processing bottlenecks or worker 
- load balances. The data we collect may help explain why some flows are 
+ load imbalances. The data we collect may help explain why some flows are 
  more expensive to process than others and which resources become
   limiting factors for performance.
 
@@ -101,7 +98,7 @@ existing behavior under the same workload.
 \underline{Evaluation}: This goal first entails the creation of a Zeek benchmarking 
 environment, with reproducible results for various traffic workloads, that 
 can be constructed with different characteristics. We should identify a 
-performance bottleneck then develop and implement a simple mitigation.
+performance bottleneck, then develop and implement a simple mitigation.
  This mitigation will be considered successful if it demonstrates measurable 
  performance improvement in one or more of the aforementioned metrics for the 
  motivating workload corresponding to the bottleneck.
@@ -125,7 +122,7 @@ improvements in one motivating workload, this stage and its improved mitigation
  will be assessed for improvements across multiple traffic mixes and rates. We 
  will compare it against the unmodified Zeek and the 75\% implementation in 
  metrics such as throughput, packet drops, CPU utilization, memory consumption, 
- and worker load-imbalance, where possible. We should also characterize the 
+ and worker load-imbalance, where possible. We will also characterize the 
  overhead introduced by the mitigation and its limitations.
 
 \subsection{125\% Goal}
@@ -171,25 +168,23 @@ Our main resources will include:
 
 \section{Team Member Responsibilities}
 
-Our goal is to create as meaningful a solution as possible within the semester.
- To achieve this, we need to operate efficiently as a team. We will 
-prioritize strong communication and aim to make significant progress early in 
-the semester. We plan to meet in-person at least once a week. During these 
-meetings, we will set goals for the week and develop designs based on input 
-from all three team members. We will then complete our work separately before 
+Early in the semester, we will prioritize strong communication and aim to make 
+significant progress. We plan to meet in-person at least once a week. During these 
+meetings, we will set goals for the week and develop designs based on collaborative
+discussions. We will then complete our assigned work separately before 
 regrouping. Finally, we plan to check in periodically with Dr. Sengupta to get 
 feedback on our direction and identify missing elements.
 
-The following is an example of how we intend to divide the proposed work among 
-the three teammates. One person will likely take the lead in setting up the 
+The following is an example of how we intend to divide the proposed work. 
+One person will likely take the lead in setting up the 
 Zeek and packet-generating nodes in CloudLab, but all three of us will 
-participate so that each of us can easily modify the profiling framework as 
+participate so that we can easily modify the profiling framework as 
 needed. Next, we will each pick one or two of the packet characteristics to 
 profile, collecting the data required for the remaining parts of the project. 
-Together, we will then identify the bottleneck that appears most promising to 
-address. For each mitigation type explained in the “Evaluation” section (basic, 
-improved, and dynamic), we will independently develop potential mitigation 
-strategies, combine our ideas into a single solution focusing, and implement 
+Together, we will then identify the bottleneck that appears most promising. For 
+each mitigation type explained in the “Evaluation” section (basic, 
+improved, and dynamic), we will independently investigate potential mitigation 
+strategies, combine our ideas into a single solution, and implement 
 it together. For the report and presentation, all three of us will contribute 
 to an initial draft. Then, one or two team members will focus on refining the 
 report while the others develop the presentation.
