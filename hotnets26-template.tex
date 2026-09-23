@@ -60,21 +60,15 @@ improving on Zeek's packet-processing performance, its users will be able to
 analyze larger workloads with more accuracy and gain better visibility into
 network traffic.
 
-\section{Proposed Work}
+\section{PROPOSED WORK AND EVALUATION}
 
-("define the proposed interface and implementation")
-
-
-\section{Evaluation}
-
-We will evaluate the project using controlled workloads that vary four traffic 
-characteristics: packet rate, packet size, flow churn, and protocol mix. Profiling 
-these variables may help explain why some flows are more expensive to process than 
-others.
-
-Our evaluation will focus on whether these workload characteristics contribute 
-to bottlenecks and load imbalances, and how our proposed mitigation improves 
-performance.
+To begin, we will evaluate Zeek using controlled, reproducible workloads that 
+vary four traffic characteristics: packet rate, packet size, flow churn, and 
+protocol mix. Our assessment will focus on whether these workload
+ characteristics contribute to processing bottlenecks or worker 
+ load balances. The data we collect may help explain why some flows are 
+ more expensive to process than others and which resources become
+  limiting factors for performance.
 
 Our main metrics will be:
 
@@ -82,54 +76,79 @@ Our main metrics will be:
     \item packet-processing throughput,
     \item packet-drop rate,
     \item CPU utilization,
-    \item worker load imbalance,
-    \item memory consumption
-    \item any overhead introduced by the proposed mitigation
+    \item memory consumption, and
+    \item worker load imbalance (for multi-worker deployments)
 \end{itemize}
+
+In each of the goals described below, we will develop a mitigation for a 
+bottleneck identified by our profiling of Zeek. Once we implement these 
+solutions, we will rerun the same workloads to identify their effects on the 
+tool’s packet processing. Thus, naturally, another metric we will evaluate is 
+overhead introduced by the proposed mitigation.
 
 \subsection{75\% Goal}
 
-We will characterize how Zeek performance and worker imbalance change 
-by running workloads with different packet rates, packet sizes, flow churn, and 
-protocol mixes. Using these experiments, we expect to narrow down to one 
-reproducible performance bottleneck.
+Using the profiling described above, our first goal will be to identify a 
+single bottleneck, resulting from one or more traffic 
+characteristics. We will then implement a simple mitigation that addresses 
+the identified bottleneck. For example, if a bottleneck was identified within a single 
+worker, we could attempt to identify and remove unnecessary processing. If 
+a bottleneck regarding worker load imbalance was chosen, we could create a 
+simple modification to Zeek’s existing flow-assignment policy to distribute 
+them more evenly. We will then compare the proposed mitigation against Zeek’s 
+existing behavior under the same workload. 
 
-We will then implement a simple mitigation that addresses the identified 
-bottleneck. For example, if worker imbalance is the targeted issue, we will implement 
-cost-aware flow-assignment to send new flows to a less-loaded Zeek worker.
-
-We will compare the proposed mitigation against Zeek's existing behavior under 
-the same workload. We will consider this goal successful if the mitigation 
-demonstrates a measurable performance improvement, like reduced worker imbalance, 
-fewer packet drops, lower CPU utilization, or higher throughput.
+\underline{Evaluation}: This goal first entails the creation of a Zeek benchmarking 
+environment, with reproducible results for various traffic workloads, that 
+can be constructed with different characteristics. We should identify a 
+performance bottleneck then develop and implement a simple mitigation.
+ This mitigation will be considered successful if it demonstrates measurable 
+ performance improvement in one or more of the aforementioned metrics for the 
+ motivating workload corresponding to the bottleneck.
 
 \subsection{100\% Goal}
 
-We will design and implement an improved mitigation based on the bottleneck 
-identified during profiling and on the results of the 75\% implementation. For worker
-imbalance, we will iterate on our cost-aware flow-assignment strategy
-to consider the estimated processing cost of a new flow and the current 
-load of each Zeek worker while preserving flow affinity. For other bottlenecks, 
-we will design an improved mitigation.
+For this stage of the project, we will design and implement an improved 
+mitigation for the bottleneck identified during profiling, based on the 
+evaluation results of the 75\% implementation. Rather than optimizing for 
+a single motivating workload, our mitigation will strive to be reasonably 
+performant across most traffic workloads.
 
-We will evaluate the improved mitigation across different 
-types of network traffic, comparing it against Zeek's existing performance. We will 
-measure metrics such as throughput, packet drops, CPU utilization, worker-load 
-imbalance, memory consumption, and overhead. Using these metrics, we will characterize 
-the observed benefits and possible limitations of the mitigation.
+For example, if a worker load-imbalance was the primary bottleneck, we might
+ implement a cost-aware flow-assignment strategy that considers a new flow’s 
+ estimated processing cost and the current load of each worker, before making 
+ an assignment, while still ensuring flow affinity. For other bottlenecks, our 
+ mitigation will attempt to ensure performance across multiple traffic workloads.
+
+\underline{Evaluation}: While the 75\% goal was evaluated according to its performance 
+improvements in one motivating workload, the stage and its improved mitigation
+ will be assessed for improvements across multiple traffic mixes and rates. We 
+ will compare it against the unmodified Zeek and the 75\% implementation in 
+ metrics such as throughput, packet drops, CPU utilization, memory consumption, 
+ and worker load-imbalance, where possible. We should also characterize the 
+ overhead introduced by the mitigation and its limitations.
 
 \subsection{125\% Goal}
 
-We will extend the 100\% solution with a more dynamic implementation that responds 
-to changes in workload behavior. One possible extension is to predict a new flow's 
-processing cost using information from its first few packets (e.g. packet 
-size, header metadata, transport protocol). 
-We will evaluate whether this prediction improves worker assignment compared with 
-the 100\% solution.
+Our 125\% implementation will extend the 100\% solution with a more advanced
+ implementation that dynamically analyzes and responds to changes in workload
+  behavior.
 
-For other bottlenecks, the 125\% goal will extend the existing mitigation, 
-possibly by identifying unusually expensive flows or dynamically adding/removing 
-workers.
+If we identify worker imbalance as our chosen bottleneck for system performance,
+ one possible extension is to predict a new flow’s processing cost using 
+ information from its first few packets (e.g., packet size, header metadata,
+  transport protocol). Another option is to dynamically scale the number of
+   Zeek workers or possibly migrate flows from one worker to another. For 
+   other bottlenecks, possible ideas include adapting to changing protocol 
+   mixes and/or detecting and specially handling unusually expensive flows.
+
+\underline{Evaluation}: This stage will be evaluated by its benefit (and cost) in the
+ aforementioned metrics in comparison to the 100\% solution and unmodified Zeek
+  implementation. The 125\% solution should demonstrate the ability to determine
+   changing workload conditions and adjust accordingly. This solution will be
+    evaluated by the extra performance it provides relative to the cost of the
+     dynamic reasoning, and we should also identify how quickly it is able to make
+      these changes.
 
 \section{Required Resources}
 
@@ -152,9 +171,9 @@ Our main resources will include:
 
 \section{Team Member Responsibilities}
 
-Our goal is to create as meaningful a solution as possible within the limited 
-timeframe. To achieve this, we need to operate efficiently as a team, and the 
-basic responsibilities of each team member are structured accordingly. We will 
+Our goal is to create as meaningful a solution as possible within the semester.
+ To achieve this, we need to operate efficiently as a team, and the 
+basic responsibilities of each team member are structured to achieve this. We will 
 prioritize strong communication and aim to make significant progress early in 
 the semester. We plan to meet in-person at least once a week. During these 
 meetings, we will craft goals for the week and develop designs based on input 
