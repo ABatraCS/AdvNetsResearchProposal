@@ -81,11 +81,9 @@ Our main metrics will be:
     \item worker load imbalance (for multi-worker deployments)
 \end{itemize}
 
-In each of the goals described below, we will develop a mitigation for a 
-bottleneck identified by our profiling of Zeek. Once we implement these 
-solutions, we will rerun the same workloads to identify their effects on the 
-tool’s packet processing. Thus, naturally, another metric we will evaluate is 
-overhead introduced by the proposed mitigation.
+For each goal below, we will develop a mitigation for a bottleneck identified 
+during profiling. We will then rerun the same workloads to identify the overhead
+introduced by the mitigation on the tool's packet processing, using the same metrics above.
 
 \subsection{75\% Goal}
 
