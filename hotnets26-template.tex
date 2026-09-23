@@ -51,11 +51,14 @@ to incomplete visibility into network traffic as packets are dropped from proces
 queues. In deployments with multiple workers, which are typically assigned packets via 
 flow hashing, this variable cost can also lead to load imbalances across workers.
  As a result, the actual processing capacity of a worker cluster may be lower than
-  the theoretical maximum, as seen in metrics including throughput and packet drops.
+ the theoretical maximum, as seen in metrics including throughput and packet drops.
 
-
-("identify the intended users and their current workflow, survey existing tools, explain the missing capability"
-
+Zeek's users range from network security operators of enterprise networks to
+academic researchers. Our hope is to mitigate the bottlenecks that prevent them
+from using the tool and its underlying resources to the fullest potential. By
+improving on Zeek's packet-processing performance, its users will be able to
+analyze larger workloads with more accuracy and gain better visibility into
+network traffic.
 
 \section{Proposed Work}
 
@@ -130,7 +133,7 @@ workers.
 
 \section{Required Resources}
 
-The proposed work does not require specialized hardware or a multi-GPU cluster. 
+The proposed work does not require specialized hardware or a multi-GPU cluster.
 
 Our main resources will include:
 
@@ -138,7 +141,8 @@ Our main resources will include:
     \item \textbf{CloudLab} for compute resources
     \item \textbf{tcpreplay} for existing packet captures
     \item \textbf{iperf3} for generating traffic with variable packet sizes and 
-    flow patterns
+    flow patterns with highease of use
+    \item \textbf{DPDK} for generating high-speed traffic and greater control, as needed
     \item \textbf{Linux \texttt{perf}} for profiling CPU usage
     \item \textbf{\texttt{zeekctl top}} for measuring per-worker CPU and memory 
     utilization
@@ -148,7 +152,30 @@ Our main resources will include:
 
 \section{Team Member Responsibilities}
 
-(Replace this text with the body of your paper.)
+Our goal is to create as meaningful a solution as possible within the limited 
+timeframe. To achieve this, we need to operate efficiently as a team, and the 
+basic responsibilities of each team member are structured accordingly. We will 
+prioritize strong communication and aim to make significant progress early in 
+the semester. We plan to meet in-person at least once a week. During these 
+meetings, we will craft goals for the week and develop designs based on input 
+from all three team members. We will then complete our work separately before 
+regrouping. Finally, we plan to check in periodically with Dr. Sengupta to get 
+feedback on our direction and identify any aspects we may be overlooking.
+
+The following is an example of how we intend to divide the proposed work among 
+the three teammates. One person will likely take the lead in setting up the 
+Zeek and packet-generating nodes in CloudLab, but all three of us will 
+participate so that each of us can easily modify the profiling framework as 
+needed. Next, we will each pick one or two of the packet characteristics to 
+profile, collecting the data required for the remaining parts of the project. 
+Together, we will then identify the bottleneck that appears most promising to 
+address. For each mitigation type explained in the “Evaluation” section (basic, 
+improved, and dynamic), we will independently develop potential mitigation 
+strategies, combine our ideas into a single solution focusing, and implement 
+it together. For the report and presentation, all three of us will contribute 
+to an initial draft. Then, one or two team members will focus on refining the 
+report while the others develop the presentation.
+
 
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{hotnets26-template}
