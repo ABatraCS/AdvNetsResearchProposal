@@ -75,6 +75,16 @@ immediately, even during high load. Furthermore, to simplify the design,
 they chose to handle packet-related events immediately, a tradeoff that might have contributed to 
 performance bottlenecks.
 
+In \textit{Re-examining the performance bottleneck in a NIDS with detailed profiling},
+its authors profile Bro to identify performance bottlenecks and guide future
+improvements of NIDS  ~\cite{lin2013}. While earlier work largely focused on speeding-up 
+pattern matching, they note that improvements in pattern-matching
+did not necessarily translate into equivalent improvements in overall 
+system performance, as other processing stages became bottlenecks. 
+In their profiling of Bro, they identify policy script execution as a key limiting 
+factor, leading to their recommendation of greater compilation into
+"binary codes native to the CPU."
+
 \section{Proposed Work and Evaluation}
 
 To begin, we will evaluate Zeek using controlled, reproducible workloads that 
