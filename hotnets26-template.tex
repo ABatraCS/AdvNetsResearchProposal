@@ -14,9 +14,8 @@
 
 \begin{abstract}
 We present a proposal for identifying and alleviating bottlenecks in Zeek,
-a network security monitoring system. Prior work has shown that CPU and memory
-consumption for Zeek, previously called Bro, is subject to the characteristics
-of the network traffic~\cite{dreger08}.
+a network security monitoring system. Prior work shows that CPU and memory
+consumption for Zeek, previously called Bro, depends on network traffic characteristics ~\cite{dreger08}.
 
 We outline a proposal for designing a reproducible profiling framework and using the 
 resulting data to investigate strategies for mitigating bottlenecks. In this project, 
@@ -49,7 +48,7 @@ to incomplete visibility into network traffic as packets are dropped from proces
 queues. In deployments with multiple workers, which are typically assigned packets via 
 flow hashing, this variable cost can also lead to load imbalances across workers.
  As a result, the actual processing capacity of a worker cluster may be lower than
- the theoretical maximum, as seen in metrics including throughput and packet drops.
+ the theoretical maximum, as reflected in throughput and packet drops.
 
 Zeek's users range from network security operators of enterprise networks to
 academic researchers. Our hope is to mitigate the bottlenecks that prevent them
@@ -60,10 +59,9 @@ network traffic.
 
 \section{Related Work}
 
-Perhaps the most foundational related work for this project is 
-\textit{Bro: A System for Detecting Network Intruders in Real-Time} ~\cite{paxson98}. Although
-Zeek's design has gone through many iterations since this first research paper,
-it highlights several of the author's priorities for performance, including
+The most foundational related work is
+\textit{Bro: A System for Detecting Network Intruders in Real-Time} ~\cite{paxson98}. Though
+Zeek has since evolved, the paper highlights performance priorities, including
 maximizing throughput and avoiding packet drops. It identifies several
 techniques for improving performance, including filtering packets in the kernel
 and avoiding blocking the single thread. It also
@@ -73,8 +71,7 @@ they chose to handle packet-related events immediately, a tradeoff that might ha
 performance bottlenecks.
 
 In \textit{Re-examining the performance bottleneck in a NIDS with detailed profiling},
-its authors profile Bro to identify performance bottlenecks and guide future
-improvements of NIDS  ~\cite{lin2013}. While earlier work largely focused on speeding-up 
+the authors profile Bro to guide future NIDS improvements ~\cite{lin2013}. While earlier work largely focused on speeding-up 
 pattern matching, they note that improvements in pattern-matching
 did not necessarily translate into equivalent improvements in overall 
 system performance, as other processing stages became bottlenecks. 
@@ -84,11 +81,10 @@ factor, leading to their recommendation of greater compilation into
 
 Campbell and Lee take a different approach in \textit{Prototyping a 100G Monitoring System}
 ~\cite{campbell2012}. They go beyond profiling, attempting to reduce the amount
-of traffic that Bro analyzes to begin with. Their mitigation identifies large flows,
+of traffic that Bro analyzes. Their mitigation identifies large flows,
 implementing a "shunting" policy to limit packet processing once certain conditions
 are met. This reduces the load on Bro workers once enough information has been
-collected, demonstrating a bottleneck mitigation targeted at a particular type of 
-traffic. 
+collected, demonstrating a mitigation targeted at one traffic type.
 
 \section{Proposed Work and Evaluation}
 
@@ -112,7 +108,7 @@ Our main metrics will be:
 
 For each goal below, we will develop a mitigation for a bottleneck identified 
 during profiling. We will then rerun the same workloads to identify the overhead
-introduced by the mitigation on the tool's packet processing, using the same metrics above.
+introduced by the mitigation, using the same metrics.
 
 \subsection{75\% Goal}
 
@@ -134,33 +130,26 @@ performance improvements in any of the aforementioned evaluation metrics.
 
 \subsection{100\% Goal}
 
-For this stage of the project, we will design and implement an improved 
-mitigation for the bottleneck identified during profiling, based on the 
-evaluation results of the 75\% implementation. Going beyond optimizing for 
+Next, we will design and implement an improved 
+mitigation for the bottleneck identified during profiling, based on 75\% evaluation results. Going beyond optimizing for 
 a single motivating workload, our mitigation will strive to be reasonably 
 performant across most traffic workloads.
 
-For example, if a worker load-imbalance is the primary bottleneck, we might
+For example, for worker load imbalance, we might
 implement a cost-aware flow-assignment strategy that considers a new flow’s 
 estimated processing cost and the current load of each worker, while still ensuring 
 flow affinity.
 
-\underline{Evaluation}: While the 75\% goal was evaluated according to its performance 
-improvements in one motivating workload, this stage and its improved mitigation
-will be assessed for improvements across multiple traffic mixes and rates. We 
-will compare it against the unmodified Zeek and the 75\% implementation in 
-metrics such as throughput, packet drops, CPU utilization, memory consumption, 
-and worker load-imbalance, where possible. We will also characterize the 
-overhead introduced by the mitigation and its limitations.
+\underline{Evaluation}: This stage will be assessed across multiple traffic mixes
+and rates against unmodified Zeek and the 75\% implementation, using the metrics
+above. We will also characterize the mitigation's overhead and limitations.
 
 \subsection{125\% Goal}
 
-Our 125\% implementation will extend the 100\% solution with a more advanced
-implementation that dynamically analyzes and responds to changes in workload
-behavior.
+Our 125\% goal extends the 100\% solution to dynamically analyze and respond
+to changing workloads.
 
-If we identify worker imbalance as our chosen bottleneck for system performance,
-one possible extension is to predict a new flow’s processing cost using 
+For worker imbalance, one possible extension is to predict a new flow’s processing cost using 
 information from its first few packets (e.g., packet size, header metadata,
 transport protocol). Another option is to dynamically scale the number of
 Zeek workers or possibly migrate flows from one worker to another. For 
@@ -176,36 +165,26 @@ dynamic reasoning.
 
 \section{Required Resources}
 
-The proposed work does not require specialized hardware or a multi-GPU cluster.
-
-Our main resources will include:
-
+No specialized hardware is needed. Our main resources are:
 \begin{itemize}
     \item \textbf{CloudLab} for compute resources
     \item \textbf{tcpreplay} for existing packet captures
-    \item \textbf{iperf3} for generating traffic with variable packet sizes and 
-    flow patterns with highease of use
-    \item \textbf{DPDK} for generating high-speed traffic and greater control, as needed
+    \item \textbf{iperf3} for varying packet sizes and flow patterns
+    \item \textbf{DPDK} for high-speed traffic generation
     \item \textbf{Linux \texttt{perf}} for profiling CPU usage
-    \item \textbf{\texttt{zeekctl top}} for measuring per-worker CPU and memory 
-    utilization
-    \item\textbf{Zeek's Prometheus tool} for logging per-worker CPU metrics during 
-    automated experiments
+    \item \textbf{\texttt{zeekctl top}} for per-worker CPU/memory usage
+    \item\textbf{Zeek's Prometheus tool} for metric logging
 \end{itemize}
 
 \section{Team Member Responsibilities}
 
-We plan to meet in-person at least once a week. During these 
-meetings, we will set goals for the week and develop designs based on collaborative
-discussions. We will then complete our assigned work before 
-regrouping. Finally, we plan to check in periodically with Dr. Sengupta to get 
-feedback on our direction and identify missing elements.
+We will meet in person weekly to set goals and develop designs together, then
+complete our assigned work before regrouping. Finally, we will check in periodically with Dr. Sengupta for feedback and to identify missing elements.
 
-The following is an example of how we intend to divide the proposed work. 
 We will each pick one or two of the packet characteristics to 
 profile, collecting the data required for the remaining parts of the project. 
 Together, we will then identify the bottleneck that appears most promising. For 
-each aforementioned milestone, we will investigate potential mitigation 
+each milestone, we will investigate potential mitigation 
 strategies, combine our ideas into a single solution, and implement 
 it together.
 
