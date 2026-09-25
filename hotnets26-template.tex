@@ -61,7 +61,21 @@ improving on Zeek's packet-processing performance, its users will be able to
 analyze larger workloads with more accuracy and gain better visibility into
 network traffic.
 
-\section{PROPOSED WORK AND EVALUATION}
+\section{Related Work}
+
+Perhaps the most foundational related work for this project is 
+\textit{Bro: A System for Detecting Network Intruders in Real-Time} ~\cite{paxson98}. Although
+Zeek's design has gone through many iterations since this first research paper,
+it highlights several of the author's priorities for performance, including
+maximizing throughput and avoiding packet drops. It identifies several
+techniques for improving performance, including filtering some packets in the kernel
+and avoiding blocking the single thread, for example during DNS lookups. It also
+notes several limiting factors, including the handling of expired timers 
+immediately, even during high load. Furthermore, to simplify the design, 
+they chose to handle packet-related events immediately, a tradeoff that might have contributed to 
+performance bottlenecks.
+
+\section{Proposed Work and Evaluation}
 
 To begin, we will evaluate Zeek using controlled, reproducible workloads that 
 vary four traffic characteristics: packet rate, packet size, flow churn, and 
