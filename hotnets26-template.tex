@@ -16,10 +16,7 @@
 We present a proposal for identifying and alleviating bottlenecks in Zeek,
 a network security monitoring system. Prior work has shown that CPU and memory
 consumption for Zeek, previously called Bro, is subject to the characteristics
-of the network traffic~\cite{dreger08}. For example, Campbell and Lee
-address bottlenecks created by large flows specifically by building a shunting
-policy to limit packet processing once certain conditions are 
-met, reducing the load on Bro workers~\cite{campbell2012}. 
+of the network traffic~\cite{dreger08}.
 
 We outline a proposal for designing a reproducible profiling framework and using the 
 resulting data to investigate strategies for mitigating bottlenecks. In this project, 
@@ -68,8 +65,8 @@ Perhaps the most foundational related work for this project is
 Zeek's design has gone through many iterations since this first research paper,
 it highlights several of the author's priorities for performance, including
 maximizing throughput and avoiding packet drops. It identifies several
-techniques for improving performance, including filtering some packets in the kernel
-and avoiding blocking the single thread, for example during DNS lookups. It also
+techniques for improving performance, including filtering packets in the kernel
+and avoiding blocking the single thread. It also
 notes several limiting factors, including the handling of expired timers 
 immediately, even during high load. Furthermore, to simplify the design, 
 they chose to handle packet-related events immediately, a tradeoff that might have contributed to 
@@ -84,6 +81,14 @@ system performance, as other processing stages became bottlenecks.
 In their profiling of Bro, they identify policy script execution as a key limiting 
 factor, leading to their recommendation of greater compilation into
 "binary codes native to the CPU."
+
+Campbell and Lee take a different approach in \textit{Prototyping a 100G Monitoring System}
+~\cite{campbell2012}. They go beyond profiling, attempting to reduce the amount
+of traffic that Bro analyzes to begin with. Their mitigation identifies large flows,
+implementing a "shunting" policy to limit packet processing once certain conditions
+are met. This reduces the load on Bro workers once enough information has been
+collected, demonstrating a bottleneck mitigation targeted at a particular type of 
+traffic. 
 
 \section{Proposed Work and Evaluation}
 
@@ -111,67 +116,63 @@ introduced by the mitigation on the tool's packet processing, using the same met
 
 \subsection{75\% Goal}
 
-Using the profiling described above, our first goal will be to identify a 
-single bottleneck, resulting from one or more traffic 
+Our first goal will be to profile Zeek and identify a 
+single bottleneck associated with specific traffic 
 characteristics. We will then implement a simple mitigation that addresses 
 the identified bottleneck. For example, if a bottleneck was identified within a single 
-worker, we could attempt to identify and remove unnecessary processing. If 
+worker, we could attempt to remove unnecessary processing. If 
 a bottleneck regarding worker load imbalance was chosen, we could create a 
 simple modification to Zeek’s existing flow-assignment policy to distribute 
-them more evenly. We will then compare the proposed mitigation against Zeek’s 
+flows more evenly. We will then compare the proposed mitigation against Zeek’s 
 existing behavior under the same workload. 
 
 \underline{Evaluation}: This goal first entails the creation of a Zeek benchmarking 
-environment, with reproducible results for various traffic workloads, that 
-can be constructed with different characteristics. We should identify a 
+environment, with reproducible results for various traffic workloads. We should identify a 
 performance bottleneck, then develop and implement a simple mitigation.
- This mitigation will be considered successful if it demonstrates measurable 
- performance improvement in one or more of the aforementioned metrics for the 
- motivating workload corresponding to the bottleneck.
+This mitigation will be considered successful if it demonstrates measurable 
+performance improvements in any of the aforementioned evaluation metrics.
 
 \subsection{100\% Goal}
 
 For this stage of the project, we will design and implement an improved 
 mitigation for the bottleneck identified during profiling, based on the 
-evaluation results of the 75\% implementation. Rather than optimizing for 
+evaluation results of the 75\% implementation. Going beyond optimizing for 
 a single motivating workload, our mitigation will strive to be reasonably 
 performant across most traffic workloads.
 
-For example, if a worker load-imbalance was the primary bottleneck, we might
- implement a cost-aware flow-assignment strategy that considers a new flow’s 
- estimated processing cost and the current load of each worker, before making 
- an assignment, while still ensuring flow affinity. For other bottlenecks, our 
- mitigation will attempt to ensure performance across multiple traffic workloads.
+For example, if a worker load-imbalance is the primary bottleneck, we might
+implement a cost-aware flow-assignment strategy that considers a new flow’s 
+estimated processing cost and the current load of each worker, while still ensuring 
+flow affinity.
 
 \underline{Evaluation}: While the 75\% goal was evaluated according to its performance 
 improvements in one motivating workload, this stage and its improved mitigation
- will be assessed for improvements across multiple traffic mixes and rates. We 
- will compare it against the unmodified Zeek and the 75\% implementation in 
- metrics such as throughput, packet drops, CPU utilization, memory consumption, 
- and worker load-imbalance, where possible. We will also characterize the 
- overhead introduced by the mitigation and its limitations.
+will be assessed for improvements across multiple traffic mixes and rates. We 
+will compare it against the unmodified Zeek and the 75\% implementation in 
+metrics such as throughput, packet drops, CPU utilization, memory consumption, 
+and worker load-imbalance, where possible. We will also characterize the 
+overhead introduced by the mitigation and its limitations.
 
 \subsection{125\% Goal}
 
 Our 125\% implementation will extend the 100\% solution with a more advanced
- implementation that dynamically analyzes and responds to changes in workload
-  behavior.
+implementation that dynamically analyzes and responds to changes in workload
+behavior.
 
 If we identify worker imbalance as our chosen bottleneck for system performance,
- one possible extension is to predict a new flow’s processing cost using 
- information from its first few packets (e.g., packet size, header metadata,
-  transport protocol). Another option is to dynamically scale the number of
-   Zeek workers or possibly migrate flows from one worker to another. For 
-   other bottlenecks, possible ideas include adapting to changing protocol 
-   mixes and/or detecting and specially handling unusually expensive flows.
+one possible extension is to predict a new flow’s processing cost using 
+information from its first few packets (e.g., packet size, header metadata,
+transport protocol). Another option is to dynamically scale the number of
+Zeek workers or possibly migrate flows from one worker to another. For 
+other bottlenecks, possible ideas include adapting to changing protocol 
+mixes and/or targeting unusually expensive flows.
 
-\underline{Evaluation}: This stage will be evaluated by its benefit (and cost) in the
- aforementioned metrics in comparison to the 100\% solution and unmodified Zeek
-  implementation. The 125\% solution should demonstrate the ability to determine
-   changing workload conditions and adjust accordingly. This solution will be
-    evaluated by the extra performance it provides relative to the cost of the
-     dynamic reasoning, and we should also identify how quickly it is able to make
-      these changes.
+\underline{Evaluation}: This stage will be evaluated by its benefit (and cost) 
+in comparison to the 100\% solution and unmodified Zeek
+implementation. The 125\% solution should demonstrate the ability to determine
+changing workload conditions and adjust accordingly. This solution will be
+evaluated by the extra performance it provides relative to the cost of the
+dynamic reasoning.
 
 \section{Required Resources}
 
@@ -194,26 +195,19 @@ Our main resources will include:
 
 \section{Team Member Responsibilities}
 
-Early in the semester, we will prioritize strong communication and aim to make 
-significant progress. We plan to meet in-person at least once a week. During these 
+We plan to meet in-person at least once a week. During these 
 meetings, we will set goals for the week and develop designs based on collaborative
-discussions. We will then complete our assigned work separately before 
+discussions. We will then complete our assigned work before 
 regrouping. Finally, we plan to check in periodically with Dr. Sengupta to get 
 feedback on our direction and identify missing elements.
 
 The following is an example of how we intend to divide the proposed work. 
-One person will likely take the lead in setting up the 
-Zeek and packet-generating nodes in CloudLab, but all three of us will 
-participate so that we can easily modify the profiling framework as 
-needed. Next, we will each pick one or two of the packet characteristics to 
+We will each pick one or two of the packet characteristics to 
 profile, collecting the data required for the remaining parts of the project. 
 Together, we will then identify the bottleneck that appears most promising. For 
-each mitigation type explained in the “Evaluation” section (basic, 
-improved, and dynamic), we will independently investigate potential mitigation 
+each aforementioned milestone, we will investigate potential mitigation 
 strategies, combine our ideas into a single solution, and implement 
-it together. For the report and presentation, all three of us will contribute 
-to an initial draft. Then, one or two team members will focus on refining the 
-report while the others develop the presentation.
+it together.
 
 
 \bibliographystyle{ACM-Reference-Format}
